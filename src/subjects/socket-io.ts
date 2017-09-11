@@ -168,6 +168,13 @@ export class IO {
         });
     };
 
+	public close() :void {
+        if (this._connected) {
+            this.socket.disconnect();
+			this.connected = false;
+        }
+	};
+
     /**
      * check if socket is connected
      * @returns {boolean}
@@ -180,9 +187,6 @@ export class IO {
      * @param value
      */
     public set connected(value: boolean) {
-        if (value === false && this._connected) {
-            this.socket.disconnect();
-        }
         this._connected = value;
         this._socketState.next({connected: value});
     };
