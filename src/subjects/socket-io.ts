@@ -148,7 +148,7 @@ export class IO {
         else if (this.connected && forceNew) this.connected = false;
 
         this.socket = io(address || SOCKET_URL, opts);
-        this.socket.on('connect', () => {
+        this.socket.once('connect', () => {
 			// Set the private state, we send our own connect event with the socket id
             this._connected = true;
             this._socketState.next({connected: true, id: this.socket.id || 0 });
@@ -161,9 +161,13 @@ export class IO {
                 ioEvent.hook(this.socket);
             });
 
+			this.socket.on('connect', () => {
+				this.connected = true;
+			});
+
             this.socket.on('disconnect', () => {
                 this.connected = false;
-            })
+            });
         });
 
 		return this.socket;

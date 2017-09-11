@@ -147,7 +147,7 @@ var IO = /** @class */ (function () {
         else if (this.connected && forceNew)
             this.connected = false;
         this.socket = io(address || SOCKET_URL, opts);
-        this.socket.on('connect', function () {
+        this.socket.once('connect', function () {
             // Set the private state, we send our own connect event with the socket id
             _this._connected = true;
             _this._socketState.next({ connected: true, id: _this.socket.id || 0 });
@@ -157,6 +157,9 @@ var IO = /** @class */ (function () {
                  * to all listeners (that would kinda defeat the "io" part of "SocketIO")
                  * */
                 ioEvent.hook(_this.socket);
+            });
+            _this.socket.on('connect', function () {
+                _this.connected = true;
             });
             _this.socket.on('disconnect', function () {
                 _this.connected = false;
