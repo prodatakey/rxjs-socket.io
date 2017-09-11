@@ -6,7 +6,7 @@ var io = require("socket.io-client");
 var isObject_1 = require("rxjs/util/isObject");
 var SOCKET_URL = "http://localhost:5000";
 var IO = /** @class */ (function () {
-    function IO() {
+    function IO(address, opts) {
         /** events will be used to push which events we should be listening to */
         this.events = [];
         this._socketState = new ReplaySubject_1.ReplaySubject(1);
@@ -19,6 +19,8 @@ var IO = /** @class */ (function () {
         /** this prop will pretty much control the "is connected" or not.
          * it also controls whether or not we should issue this.socket.disconnect() */
         this._connected = false;
+        this.address = address;
+        this.opts = opts;
     }
     /**
      * returns an event by matching ioEvent.name against the provided argument string
@@ -137,16 +139,17 @@ var IO = /** @class */ (function () {
      * Makes a new connection to the @SOCKET_URL const and sets up a `on connect` by default
      * which will in turn update the @this._socketState Subject with the containing
      * the received data as an argument (as well as the event-name)
-     * @param address {String}     defaults to "http://localhost:5000"
-     * @param forceNew {Boolean}
+     * @param forceNew Whether to force a new socket connection
      */
-    IO.prototype.connect = function (address, forceNew, opts) {
+    IO.prototype.connect = function (string, forceNew) {
         var _this = this;
         if (this.connected && !forceNew)
             return;
-        else if (this.connected && forceNew)
+        else if (this.connected && forceNew) {
+            this.disconnect();
             this.connected = false;
-        this.socket = io(address || SOCKET_URL, opts);
+        }
+        this.socket = io(this.address || SOCKET_URL, this.opts);
         this.socket.once('connect', function () {
             // Set the private state, we send our own connect event with the socket id
             _this._connected = true;

@@ -3,6 +3,8 @@ import { Subscription } from 'rxjs';
 export declare class IO {
     /** this will be set as a reference to io.Socket */
     private socket;
+    private address;
+    private opts;
     /** events will be used to push which events we should be listening to */
     private events;
     private _socketState;
@@ -22,7 +24,7 @@ export declare class IO {
      * @returns {ioEvent | boolean}
      */
     private getEvent(name, isUnique?);
-    constructor();
+    constructor(address?: string, opts?: any);
     /** a reference to the raw socket returned from io(), if connected */
     readonly raw: any;
     /** an alias for `this.Socket.emit();`
@@ -77,10 +79,9 @@ export declare class IO {
      * Makes a new connection to the @SOCKET_URL const and sets up a `on connect` by default
      * which will in turn update the @this._socketState Subject with the containing
      * the received data as an argument (as well as the event-name)
-     * @param address {String}     defaults to "http://localhost:5000"
-     * @param forceNew {Boolean}
+     * @param forceNew Whether to force a new socket connection
      */
-    connect(address?: string, forceNew?: boolean, opts?: any): void;
+    connect(string: any, forceNew?: boolean): void;
     /**
      * Closes the socket connection
      */

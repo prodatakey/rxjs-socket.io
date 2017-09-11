@@ -11,6 +11,10 @@ export class IO {
     /** this will be set as a reference to io.Socket */
     private socket: any;
 
+	// Address and options for creating the socket.io socket
+	private address: string;
+	private opts: any;
+
     /** events will be used to push which events we should be listening to */
     private events: ioEvent[] = [];
 
@@ -43,7 +47,11 @@ export class IO {
         });
         return foundEvent;
     }
-    constructor() {}
+
+    constructor(address?: string, opts?: any) {
+		this.address = address;
+		this.opts = opts;
+	}
     
     /** a reference to the raw socket returned from io(), if connected */
     public get raw() { return this.connected && this.socket }
@@ -140,14 +148,16 @@ export class IO {
      * Makes a new connection to the @SOCKET_URL const and sets up a `on connect` by default
      * which will in turn update the @this._socketState Subject with the containing
      * the received data as an argument (as well as the event-name)
-     * @param address {String}     defaults to "http://localhost:5000"
-     * @param forceNew {Boolean}
+     * @param forceNew Whether to force a new socket connection
      */
-    public connect(address?: string, forceNew?:boolean, opts?: any) :void {
+    public connect(string, forceNew?:boolean) :void {
         if (this.connected && !forceNew) return;
-        else if (this.connected && forceNew) this.connected = false;
+        else if (this.connected && forceNew) {
+			this.disconnect();
+			this.connected = false;
+		}
 
-        this.socket = io(address || SOCKET_URL, opts);
+        this.socket = io(this.address || SOCKET_URL, this.opts);
         this.socket.once('connect', () => {
 			// Set the private state, we send our own connect event with the socket id
             this._connected = true;
