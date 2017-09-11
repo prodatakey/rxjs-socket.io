@@ -143,15 +143,16 @@ export class IO {
      * @param address {String}     defaults to "http://localhost:5000"
      * @param forceNew {Boolean}
      */
-    public connect(address?: string, forceNew?:boolean) :void {
+    public connect(address?: string, forceNew?:boolean, opts?: any) :void {
         if (this.connected && !forceNew) return;
         else if (this.connected && forceNew) this.connected = false;
 
-        this.socket = io(address || SOCKET_URL);
+        this.socket = io(address || SOCKET_URL, opts);
         this.socket.on('connect', () => {
-            this.connected = true;
-
+			// Set the private state, we send our own connect event with the socket id
+            this._connected = true;
             this._socketState.next({connected: true, id: this.socket.id || 0 });
+
             this.events.forEach(ioEvent => {
                 /** this is where we hook our previously new()ed ioEvents to the socket.
                  * This is so we can have one listener per event. as opposed to one event
@@ -164,9 +165,14 @@ export class IO {
                 this.connected = false;
             })
         });
+
+		return this.socket;
     };
 
-	public close() :void {
+	/**
+	 * Closes the socket connection
+	 */
+	public disconnect() :void {
         if (this._connected) {
             this.socket.disconnect();
 			this.connected = false;
@@ -180,9 +186,8 @@ export class IO {
     public get connected() {return this._connected; }
 
     /**
-     * If anyone makes a this.connect = false; the connection to the socket.io should be closed
-     * and another default error set.
-     * @param value
+	 * Sends a new connection status event
+     * @param value Connection status
      */
     public set connected(value: boolean) {
         this._connected = value;

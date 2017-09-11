@@ -80,16 +80,18 @@ export declare class IO {
      * @param address {String}     defaults to "http://localhost:5000"
      * @param forceNew {Boolean}
      */
-    connect(address?: string, forceNew?: boolean): void;
-    close(): void;
+    connect(address?: string, forceNew?: boolean, opts?: any): void;
+    /**
+     * Closes the socket connection
+     */
+    disconnect(): void;
     /**
      * check if socket is connected
      * @returns {boolean}
      */
     /**
-     * If anyone makes a this.connect = false; the connection to the socket.io should be closed
-     * and another default error set.
-     * @param value
+     * Sends a new connection status event
+     * @param value Connection status
      */
     connected: boolean;
 }

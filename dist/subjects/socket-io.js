@@ -140,15 +140,16 @@ var IO = /** @class */ (function () {
      * @param address {String}     defaults to "http://localhost:5000"
      * @param forceNew {Boolean}
      */
-    IO.prototype.connect = function (address, forceNew) {
+    IO.prototype.connect = function (address, forceNew, opts) {
         var _this = this;
         if (this.connected && !forceNew)
             return;
         else if (this.connected && forceNew)
             this.connected = false;
-        this.socket = io(address || SOCKET_URL);
+        this.socket = io(address || SOCKET_URL, opts);
         this.socket.on('connect', function () {
-            _this.connected = true;
+            // Set the private state, we send our own connect event with the socket id
+            _this._connected = true;
             _this._socketState.next({ connected: true, id: _this.socket.id || 0 });
             _this.events.forEach(function (ioEvent) {
                 /** this is where we hook our previously new()ed ioEvents to the socket.
@@ -161,9 +162,13 @@ var IO = /** @class */ (function () {
                 _this.connected = false;
             });
         });
+        return this.socket;
     };
     ;
-    IO.prototype.close = function () {
+    /**
+     * Closes the socket connection
+     */
+    IO.prototype.disconnect = function () {
         if (this._connected) {
             this.socket.disconnect();
             this.connected = false;
@@ -177,9 +182,8 @@ var IO = /** @class */ (function () {
          */
         get: function () { return this._connected; },
         /**
-         * If anyone makes a this.connect = false; the connection to the socket.io should be closed
-         * and another default error set.
-         * @param value
+         * Sends a new connection status event
+         * @param value Connection status
          */
         set: function (value) {
             this._connected = value;
