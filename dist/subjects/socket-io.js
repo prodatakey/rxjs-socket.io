@@ -159,8 +159,6 @@ var IO = /** @class */ (function () {
             });
             _this.socket.on('disconnect', function () {
                 _this.connected = false;
-                /** call reset state on disconnection */
-                _this.events.forEach(function (ioEvent) { return ioEvent.resetState(); });
             });
         });
     };
